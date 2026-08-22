@@ -109,6 +109,14 @@ No dependencies. Compile with any recent TypeScript compiler:
 tsc
 ```
 
+## Testing
+
+Tests use Node's built-in test runner, so there's nothing to install:
+
+```
+npm test
+```
+
 ## Status
 
 Early. The format and validation rules above are what I use for my own
