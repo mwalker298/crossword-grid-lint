@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseGrid } from "./grid.js";
-import { printGrid } from "./printer.js";
+import { printEntryList, printGrid } from "./printer.js";
 
 const VALID_GRID = `....#
 .....
@@ -62,4 +62,41 @@ test("prints blocks as ###", () => {
   const output = printGrid(grid);
   const firstLine = output.split("\n")[0];
   assert.ok(firstLine?.endsWith("###"));
+});
+
+test("entry list shows underscores for an unsolved grid", () => {
+  const { grid } = parseGrid(VALID_GRID);
+  const output = printEntryList(grid);
+  const expected = [
+    "ACROSS",
+    "1. ____",
+    "5. _____",
+    "7. _____",
+    "8. _____",
+    "9. ____",
+    "",
+    "DOWN",
+    "1. ____",
+    "2. _____",
+    "3. _____",
+    "4. _____",
+    "6. ____",
+  ].join("\n");
+  assert.equal(output, expected);
+});
+
+test("entry list spells out entries from a filled grid", () => {
+  const { grid } = parseGrid(FILLED_GRID);
+  const output = printEntryList(grid);
+  const lines = output.split("\n");
+  assert.ok(lines.includes("1. ABCD"));
+  assert.ok(lines.includes("9. TUVW"));
+  assert.ok(lines.includes("1. AEJO"));
+  assert.ok(lines.includes("6. INSW"));
+});
+
+test("entry list only underscores squares that are actually unfilled", () => {
+  const { grid } = parseGrid("AB..#\n.....\n.....\n.....\n#....");
+  const output = printEntryList(grid);
+  assert.ok(output.includes("1. AB__"));
 });

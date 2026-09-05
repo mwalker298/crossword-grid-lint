@@ -85,3 +85,20 @@ test("--no-numbers omits clue numbers", () => {
   assert.equal(code, 0);
   assert.ok(!/\d/.test(io.out.join("")));
 });
+
+test("--clues appends an ACROSS/DOWN entry list after the grid", () => {
+  const io = fakeIO({ "grid.txt": FILLED_GRID });
+  const code = runCli(["node", "cli.js", "grid.txt", "--clues"], io);
+  assert.equal(code, 0);
+  const output = io.out.join("");
+  assert.ok(output.includes("ACROSS"));
+  assert.ok(output.includes("DOWN"));
+  assert.ok(output.includes("1. ABCD"));
+});
+
+test("omits the entry list when --clues is not given", () => {
+  const io = fakeIO({ "grid.txt": VALID_GRID });
+  const code = runCli(["node", "cli.js", "grid.txt"], io);
+  assert.equal(code, 0);
+  assert.ok(!io.out.join("").includes("ACROSS"));
+});

@@ -83,6 +83,23 @@ crossword-grid-lint grid.txt                 # strict validation + pretty print
 crossword-grid-lint grid.txt --lenient       # downgrade strict checks to warnings
 crossword-grid-lint grid.txt --blank         # hide filled letters
 crossword-grid-lint grid.txt --no-numbers    # skip clue numbering
+crossword-grid-lint grid.txt --clues         # also print an ACROSS/DOWN entry list
+```
+
+The plain-text format has no field for clue text, so `--clues` prints the
+next best thing: every entry by number, spelled out from whatever letters
+are filled in so far and an underscore for each square that isn't. It's
+meant for checking a fill against, not for solving a puzzle blind:
+
+```
+ACROSS
+1. ABCD
+5. EFGHI
+...
+
+DOWN
+1. AEJO
+...
 ```
 
 Validation failures are printed to stderr, one per line, and exit with

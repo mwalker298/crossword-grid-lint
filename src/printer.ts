@@ -1,4 +1,4 @@
-import { computeEntries, type Grid } from "./grid.js";
+import { computeEntries, type Entry, type Grid } from "./grid.js";
 
 export interface PrintOptions {
   /** Label each entry's start cell with its clue number. Default true. */
@@ -45,4 +45,35 @@ export function printGrid(grid: Grid, options: PrintOptions = {}): string {
   }
 
   return lines.join("\n");
+}
+
+/**
+ * Lists every entry by number, grouped into ACROSS/DOWN sections, with the
+ * letters filled in so far and an underscore for each unsolved square. There
+ * is no separate clue text in the plain-text grid format (see README), so
+ * this is the closest thing to a clue list: it's what you'd check a partial
+ * fill against.
+ */
+export function printEntryList(grid: Grid): string {
+  const entries = computeEntries(grid);
+  const across = entries.filter((entry) => entry.direction === "across");
+  const down = entries.filter((entry) => entry.direction === "down");
+
+  const section = (label: string, list: readonly Entry[]): string[] => [
+    label,
+    ...list.map((entry) => `${entry.number}. ${entryWord(grid, entry)}`),
+  ];
+
+  return [...section("ACROSS", across), "", ...section("DOWN", down)].join("\n");
+}
+
+function entryWord(grid: Grid, entry: Entry): string {
+  let word = "";
+  for (let i = 0; i < entry.length; i++) {
+    const row = entry.direction === "across" ? entry.row : entry.row + i;
+    const col = entry.direction === "across" ? entry.col + i : entry.col;
+    const cell = grid.rows[row][col];
+    word += cell.kind === "white" && cell.letter ? cell.letter : "_";
+  }
+  return word;
 }

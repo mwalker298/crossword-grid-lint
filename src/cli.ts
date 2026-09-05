@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { GridParseError, parseGrid } from "./grid.js";
-import { printGrid } from "./printer.js";
+import { printEntryList, printGrid } from "./printer.js";
 
 /**
  * Everything main() needs from the outside world, factored out so tests can
@@ -22,7 +22,7 @@ const nodeIO: CliIO = {
 };
 
 function usage(): string {
-  return "usage: crossword-grid-lint <file> [--lenient] [--blank] [--no-numbers]\n";
+  return "usage: crossword-grid-lint <file> [--lenient] [--blank] [--no-numbers] [--clues]\n";
 }
 
 export function runCli(argv: string[], io: CliIO = nodeIO): number {
@@ -30,6 +30,7 @@ export function runCli(argv: string[], io: CliIO = nodeIO): number {
   const lenient = args.includes("--lenient");
   const blank = args.includes("--blank");
   const noNumbers = args.includes("--no-numbers");
+  const clues = args.includes("--clues");
   const filePath = args.find((arg) => !arg.startsWith("--"));
 
   if (!filePath) {
@@ -52,6 +53,11 @@ export function runCli(argv: string[], io: CliIO = nodeIO): number {
     }
     io.writeOut(printGrid(grid, { showSolution: !blank, showNumbers: !noNumbers }));
     io.writeOut("\n");
+    if (clues) {
+      io.writeOut("\n");
+      io.writeOut(printEntryList(grid));
+      io.writeOut("\n");
+    }
     return 0;
   } catch (err) {
     if (err instanceof GridParseError) {
