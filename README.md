@@ -84,6 +84,23 @@ crossword-grid-lint grid.txt --lenient       # downgrade strict checks to warnin
 crossword-grid-lint grid.txt --blank         # hide filled letters
 crossword-grid-lint grid.txt --no-numbers    # skip clue numbering
 crossword-grid-lint grid.txt --clues         # also print an ACROSS/DOWN entry list
+crossword-grid-lint grid.txt --box           # box-drawing layout instead of ### tokens
+```
+
+`--box` renders the grid with box-drawing characters and solid blocks
+instead of the plain `###` / bare-token layout, which reads closer to a
+printed puzzle:
+
+```
+┌───┬───┬───┬───┬───┐
+│1  │2  │3  │4  │███│
+│ . │ . │ . │ . │███│
+├───┼───┼───┼───┼───┤
+│5  │   │   │   │6  │
+│ . │ . │ . │ . │ . │
+├───┼───┼───┼───┼───┤
+...
+└───┴───┴───┴───┴───┘
 ```
 
 The plain-text format has no field for clue text, so `--clues` prints the

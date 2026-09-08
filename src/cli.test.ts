@@ -96,6 +96,15 @@ test("--clues appends an ACROSS/DOWN entry list after the grid", () => {
   assert.ok(output.includes("1. ABCD"));
 });
 
+test("--box switches to the box-drawing layout", () => {
+  const io = fakeIO({ "grid.txt": VALID_GRID });
+  const code = runCli(["node", "cli.js", "grid.txt", "--box"], io);
+  assert.equal(code, 0);
+  const output = io.out.join("");
+  assert.ok(output.includes("┌"));
+  assert.ok(output.includes("│1  │2  │3  │4  │███│"));
+});
+
 test("omits the entry list when --clues is not given", () => {
   const io = fakeIO({ "grid.txt": VALID_GRID });
   const code = runCli(["node", "cli.js", "grid.txt"], io);

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseGrid } from "./grid.js";
-import { printEntryList, printGrid } from "./printer.js";
+import { printEntryList, printGrid, printGridBoxed } from "./printer.js";
 
 const VALID_GRID = `....#
 .....
@@ -99,4 +99,53 @@ test("entry list only underscores squares that are actually unfilled", () => {
   const { grid } = parseGrid("AB..#\n.....\n.....\n.....\n#....");
   const output = printEntryList(grid);
   assert.ok(output.includes("1. AB__"));
+});
+
+test("boxed printer draws borders, numbers, and blocks", () => {
+  const { grid } = parseGrid(VALID_GRID);
+  const output = printGridBoxed(grid);
+  const expected = [
+    "┌───┬───┬───┬───┬───┐",
+    "│1  │2  │3  │4  │███│",
+    "│ . │ . │ . │ . │███│",
+    "├───┼───┼───┼───┼───┤",
+    "│5  │   │   │   │6  │",
+    "│ . │ . │ . │ . │ . │",
+    "├───┼───┼───┼───┼───┤",
+    "│7  │   │   │   │   │",
+    "│ . │ . │ . │ . │ . │",
+    "├───┼───┼───┼───┼───┤",
+    "│8  │   │   │   │   │",
+    "│ . │ . │ . │ . │ . │",
+    "├───┼───┼───┼───┼───┤",
+    "│███│9  │   │   │   │",
+    "│███│ . │ . │ . │ . │",
+    "└───┴───┴───┴───┴───┘",
+  ].join("\n");
+  assert.equal(output, expected);
+});
+
+test("boxed printer shows solution letters by default", () => {
+  const { grid } = parseGrid(FILLED_GRID);
+  const output = printGridBoxed(grid);
+  assert.ok(output.includes(" A "));
+  assert.ok(output.includes(" W "));
+});
+
+test("boxed printer hides letters when showSolution is false", () => {
+  const { grid } = parseGrid(FILLED_GRID);
+  const output = printGridBoxed(grid, { showSolution: false });
+  assert.ok(!/[A-Z]/.test(output));
+});
+
+test("boxed printer omits numbers when showNumbers is false", () => {
+  const { grid } = parseGrid(FILLED_GRID);
+  const output = printGridBoxed(grid, { showNumbers: false });
+  assert.ok(!/\d/.test(output));
+});
+
+test("boxed printer prints the title above the grid", () => {
+  const { grid } = parseGrid(`%title: Weekend Special\n${VALID_GRID}`);
+  const output = printGridBoxed(grid);
+  assert.ok(output.startsWith("Weekend Special\n\n┌"));
 });

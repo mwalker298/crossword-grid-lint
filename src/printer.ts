@@ -15,13 +15,7 @@ export interface PrintOptions {
 export function printGrid(grid: Grid, options: PrintOptions = {}): string {
   const showNumbers = options.showNumbers ?? true;
   const showSolution = options.showSolution ?? true;
-
-  const numberAt = new Map<string, number>();
-  if (showNumbers) {
-    for (const entry of computeEntries(grid)) {
-      numberAt.set(`${entry.row},${entry.col}`, entry.number);
-    }
-  }
+  const numberAt = numberPositions(grid, showNumbers);
 
   const lines: string[] = [];
   if (grid.title) {
@@ -42,6 +36,74 @@ export function printGrid(grid: Grid, options: PrintOptions = {}): string {
       tokens.push(numberPart + letterPart);
     }
     lines.push(tokens.join(" "));
+  }
+
+  return lines.join("\n");
+}
+
+function numberPositions(grid: Grid, showNumbers: boolean): Map<string, number> {
+  const numberAt = new Map<string, number>();
+  if (showNumbers) {
+    for (const entry of computeEntries(grid)) {
+      numberAt.set(`${entry.row},${entry.col}`, entry.number);
+    }
+  }
+  return numberAt;
+}
+
+const BOX_CELL_WIDTH = 3;
+const BOX_BLOCK = "█".repeat(BOX_CELL_WIDTH);
+
+function boxBorder(width: number, left: string, mid: string, right: string): string {
+  return left + Array(width).fill("─".repeat(BOX_CELL_WIDTH)).join(mid) + right;
+}
+
+function centerInCell(text: string): string {
+  const pad = BOX_CELL_WIDTH - text.length;
+  const left = Math.floor(pad / 2);
+  return " ".repeat(left) + text + " ".repeat(pad - left);
+}
+
+/**
+ * Renders a grid using box-drawing characters instead of the ### / bare-token
+ * layout of printGrid(). Each square is two lines tall (clue number, then
+ * letter) inside a drawn border, which reads closer to a printed puzzle than
+ * the ascii format does.
+ */
+export function printGridBoxed(grid: Grid, options: PrintOptions = {}): string {
+  const showNumbers = options.showNumbers ?? true;
+  const showSolution = options.showSolution ?? true;
+  const numberAt = numberPositions(grid, showNumbers);
+
+  const lines: string[] = [];
+  if (grid.title) {
+    lines.push(grid.title, "");
+  }
+
+  lines.push(boxBorder(grid.width, "┌", "┬", "┐"));
+
+  for (let row = 0; row < grid.height; row++) {
+    const numberCells: string[] = [];
+    const letterCells: string[] = [];
+    for (let col = 0; col < grid.width; col++) {
+      const cell = grid.rows[row][col];
+      if (cell.kind === "block") {
+        numberCells.push(BOX_BLOCK);
+        letterCells.push(BOX_BLOCK);
+        continue;
+      }
+      const number = numberAt.get(`${row},${col}`);
+      numberCells.push((number !== undefined ? String(number) : "").padEnd(BOX_CELL_WIDTH, " "));
+      const letter = showSolution && cell.letter ? cell.letter : ".";
+      letterCells.push(centerInCell(letter));
+    }
+    lines.push(`│${numberCells.join("│")}│`);
+    lines.push(`│${letterCells.join("│")}│`);
+    lines.push(
+      row < grid.height - 1
+        ? boxBorder(grid.width, "├", "┼", "┤")
+        : boxBorder(grid.width, "└", "┴", "┘"),
+    );
   }
 
   return lines.join("\n");
