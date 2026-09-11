@@ -135,6 +135,27 @@ Malformed input — ragged rows, characters that aren't `#`, `.`, or a
 letter — is rejected in both modes, since it can't be parsed into a grid
 at all.
 
+## Reading .puz files
+
+`src/puz.ts` reads the standard Across Lite `.puz` binary format into the
+same `Grid` shape the text parser produces, plus the metadata the plain-text
+format has no field for:
+
+```ts
+import { readFileSync } from "node:fs";
+import { parsePuz } from "./src/puz.js";
+
+const { grid, clues, author, notes, issues } = parsePuz(readFileSync("puzzle.puz"));
+for (const issue of issues) console.warn(issue.message);
+```
+
+This covers the core layout: the solution grid, title, author, copyright,
+clue text, and notes. It does not yet cover rebus squares, scrambled/locked
+solutions (a scrambled file parses, but the letters you get back are the
+scrambled ones, not the real answers), or the extra sections some files
+carry for timers and markup. Writing `.puz` files isn't supported yet either
+- see the roadmap.
+
 ## Building
 
 No dependencies. Compile with any recent TypeScript compiler:
@@ -155,3 +176,10 @@ npm test
 
 Early. The format and validation rules above are what I use for my own
 grids; see the roadmap for what's still missing.
+
+## Roadmap
+
+- Write `.puz` files, not just read them.
+- A CLI flag to check symmetry/length rules independently of the full
+  strict/lenient split.
+- Publish to npm with proper `bin` packaging.
