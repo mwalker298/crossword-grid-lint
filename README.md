@@ -135,7 +135,7 @@ Malformed input — ragged rows, characters that aren't `#`, `.`, or a
 letter — is rejected in both modes, since it can't be parsed into a grid
 at all.
 
-## Reading .puz files
+## Reading and writing .puz files
 
 `src/puz.ts` reads the standard Across Lite `.puz` binary format into the
 same `Grid` shape the text parser produces, plus the metadata the plain-text
@@ -153,8 +153,27 @@ This covers the core layout: the solution grid, title, author, copyright,
 clue text, and notes. It does not yet cover rebus squares, scrambled/locked
 solutions (a scrambled file parses, but the letters you get back are the
 scrambled ones, not the real answers), or the extra sections some files
-carry for timers and markup. Writing `.puz` files isn't supported yet either
-- see the roadmap.
+carry for timers and markup.
+
+`writePuz` goes the other way: a filled-in `Grid` plus clue text becomes a
+`.puz` file, ready to open in a solving app.
+
+```ts
+import { writeFileSync } from "node:fs";
+import { computeEntries } from "./src/grid.js";
+import { writePuz } from "./src/puz.js";
+
+const clues = computeEntries(grid).map(() => "TODO"); // one clue per entry, same order
+const bytes = writePuz(grid, { clues, author: "Me" });
+writeFileSync("puzzle.puz", bytes);
+```
+
+The grid passed in must be a complete solution - every white square needs a
+letter, since the .puz solution section has no way to represent a blank -
+and `clues` must line up one-to-one with `computeEntries(grid)`, in that
+order. The player-state section is always written as unsolved, so the file
+opens as a fresh puzzle rather than one that is already filled in. Like
+`parsePuz`, rebus squares and scrambling are not supported.
 
 ## Building
 
@@ -179,7 +198,6 @@ grids; see the roadmap for what's still missing.
 
 ## Roadmap
 
-- Write `.puz` files, not just read them.
 - A CLI flag to check symmetry/length rules independently of the full
   strict/lenient split.
 - Publish to npm with proper `bin` packaging.
